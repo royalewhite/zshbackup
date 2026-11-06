@@ -10,15 +10,21 @@ A simple way to list and restore your Zsh backups when you need a recovery envir
 
 Open Termux and run:
 
+```bash
 pkg install perl -y
+```
 
 2. Download ZSHBACKUP
 
+```bash
 curl -fsSL https://raw.githubusercontent.com/royalewhite/zshbackup/master/zshbackup.sh -o "$HOME/zshbackup.sh"
+```
 
 3. Launch the recovery menu
 
+```bash
 bash "$HOME/zshbackup.sh"
+```
 
 That's it! 👾
 
@@ -32,7 +38,9 @@ That's it! 👾
 
 📁 Default Backup Location
 
+```text
 /sdcard/Download/termux-outputs/ZSH_BACKUP
+```
 
 📋 Requirements
 
