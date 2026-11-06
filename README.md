@@ -6,11 +6,21 @@ A simple way to list and restore your Zsh backups when you need a recovery envir
 
 🚀 Quick Start
 
-Open Termux and paste:
+1. Install Perl
 
-pkg install curl perl -y
+Open Termux and run:
+
+pkg install perl -y
+
+2. Download ZSHBACKUP
+
 curl -fsSL https://raw.githubusercontent.com/royalewhite/zshbackup/master/zshbackup.sh -o "$HOME/zshbackup.sh"
+
+3. Launch the recovery menu
+
 bash "$HOME/zshbackup.sh"
+
+That's it! 👾
 
 ✨ Features
 
@@ -33,7 +43,7 @@ bash "$HOME/zshbackup.sh"
 
 📦 Repository
 
-https://github.com/royalewhite/zshbackup
+"GitHub Repository" (https://github.com/royalewhite/zshbackup)
 
 ---
 
