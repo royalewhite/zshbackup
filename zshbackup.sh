@@ -427,11 +427,15 @@ sub restore_snapshot {
     print "Other custom scripts will NOT be deleted.\n";
     print "Type RESTORE to continue: ";
 
-    my $answer = <STDIN> // '';
+    open my $tty, '<', '/dev/tty'
+        or die "Cannot read confirmation from terminal: $!\n";
+    my $answer = <$tty> // '';
+    close $tty;
     chomp $answer;
     die "Restore cancelled.\n" unless $answer eq 'RESTORE';
 
     print "\nCreating pre-restore safety snapshot...\n";
+    make_path($BIN) unless -d $BIN;
     my $safety = new_snapshot();
 
     my @files = snapshot_relative_files($dir);
