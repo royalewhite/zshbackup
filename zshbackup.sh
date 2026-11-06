@@ -15,36 +15,94 @@ DEFAULT_ROOT="/sdcard/Download/termux-outputs/ZSH_BACKUP"
 printf '\n📍 BACKUP LOCATION\n'
 printf '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
 printf 'Default location:\n%s\n\n' "$DEFAULT_ROOT"
-printf '💡 Press ENTER to use the default location.\n'
-printf '💡 Or paste the path to another ZSH_BACKUP folder.\n'
-printf '💡 Type Q to quit.\n'
-
 while true; do
-    printf '\nBackup directory: '
-    IFS= read -r BACKUP_ROOT || exit 0
+    printf '\n'
+    printf '📍 DIRECTORY STATUS\n'
+    printf '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
 
-    if [[ "$BACKUP_ROOT" =~ ^[Qq]$ ]]; then
-        printf '\n👋 Recovery cancelled.\n'
-        exit 0
+    if [[ -d "$DEFAULT_ROOT" ]]; then
+        printf 'Default directory: DIR ✅\n'
+    else
+        printf 'Default directory: DIR MISSING\n'
     fi
 
-    BACKUP_ROOT="${BACKUP_ROOT:-$DEFAULT_ROOT}"
-
-    if [[ -d "$BACKUP_ROOT" ]]; then
-        break
+    printf '\n'
+    if [[ -d "$DEFAULT_ROOT" ]]; then
+        printf '  1. 📂 Use existing directory\n'
     fi
+    printf '  2. ➕ Create / verify default directory\n'
+    printf '  3. 📍 Enter custom directory\n'
+    printf '  0. 🚪 Exit\n'
+    printf '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+    printf 'Select an option: '
 
-    printf '\n❌ Directory not found:\n%s\n' "$BACKUP_ROOT"
-    printf 'Check the path and try again.\n'
+    IFS= read -r choice || exit 0
+
+    case "$choice" in
+        1)
+            if [[ -d "$DEFAULT_ROOT" ]]; then
+                BACKUP_ROOT="$DEFAULT_ROOT"
+                break
+            fi
+            printf '\n⚠️ Default directory is missing.\n'
+            ;;
+
+        2)
+            if mkdir -p -- "$DEFAULT_ROOT" && [[ -d "$DEFAULT_ROOT" ]]; then
+                BACKUP_ROOT="$DEFAULT_ROOT"
+                printf '\n✅ Default directory ready.\n'
+                break
+            fi
+            printf '\n❌ Could not create the default directory.\n'
+            printf 'Check storage permissions.\n'
+            ;;
+
+        3)
+            printf '\nCustom directory path: '
+            IFS= read -r CUSTOM_ROOT || exit 0
+
+            if [[ -z "$CUSTOM_ROOT" ]]; then
+                printf '\n⚠️ No path entered.\n'
+                continue
+            fi
+
+            if [[ -d "$CUSTOM_ROOT" ]]; then
+                BACKUP_ROOT="$CUSTOM_ROOT"
+                printf '\n✅ Existing directory selected.\n'
+                break
+            fi
+
+            printf '\n📁 Directory does not exist:\n%s\n' "$CUSTOM_ROOT"
+            printf 'Create it? [y/N]: '
+            IFS= read -r create_choice || exit 0
+
+            case "$create_choice" in
+                y|Y|yes|YES|Yes)
+                    if mkdir -p -- "$CUSTOM_ROOT" && [[ -d "$CUSTOM_ROOT" ]]; then
+                        BACKUP_ROOT="$CUSTOM_ROOT"
+                        printf '\n✅ Custom directory created.\n'
+                        break
+                    fi
+                    printf '\n❌ Could not create that directory.\n'
+                    ;;
+                *)
+                    printf '\n↩️ Custom directory creation cancelled.\n'
+                    ;;
+            esac
+            ;;
+
+        0|q|Q)
+            printf '\n👋 Recovery cancelled.\n'
+            exit 0
+            ;;
+
+        *)
+            printf '\n⚠️ Invalid selection. Choose 0, 1, 2 or 3.\n'
+            ;;
+    esac
 done
 
-if [[ ! -f "$BACKUP_ROOT/manifest.txt" && ! -f "$BACKUP_ROOT/checksums.sha256" ]]; then
-    printf '\n⚠️ This folder does not look like a ZSHBACKUP snapshot collection.\n'
-    printf 'Expected snapshot folders containing manifest.txt and checksums.sha256.\n'
-    exit 1
-fi
-
-printf '\n✅ Backup directory selected.\n'
+printf '\n✅ Backup directory selected:\n%s\n' "$BACKUP_ROOT"
 
 run_engine() {
     ZSHBACKUP_ROOT="$BACKUP_ROOT" perl - "$@" <<'__ZSHBACKUP_PERL__'
